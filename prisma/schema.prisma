@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  name         String?
+  email        String   @unique
+  passwordHash String
+  role         String   @default("ADMIN")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Property {
+  id           String          @id @default(cuid())
+  title        String
+  slug         String          @unique
+  type         PropertyType
+  transaction  TransactionType
+  price        Decimal
+  city         String
+  postalCode   String?
+  address      String?
+  latitude     Float?
+  longitude    Float?
+  surface      Float?
+  rooms        Int?
+  bedrooms     Int?
+  bathrooms    Int?
+  shortDesc    String?
+  description  String?
+  features     Json?
+  dpe          String?
+  ges          String?
+  status       PropertyStatus  @default(DISPONIBLE)
+  featured     Boolean         @default(false)
+  published    Boolean         @default(false)
+  reference    String?
+  yearBuilt    Int?
+  floor        Int?
+  hasGarden    Boolean         @default(false)
+  hasGarage    Boolean         @default(false)
+  hasTerrace   Boolean         @default(false)
+  hasElevator  Boolean         @default(false)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  images       PropertyImage[]
+  appointments Appointment[]
+  contacts     ContactRequest[]
+}
+
+model PropertyImage {
+  id         String   @id @default(cuid())
+  propertyId String
+  url        String
+  alt        String?
+  position   Int      @default(0)
+  isPrimary  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+}
+
+model Appointment {
+  id            String            @id @default(cuid())
+  propertyId    String?
+  firstName     String
+  lastName      String
+  email         String
+  phone         String?
+  message       String?
+  startAt       DateTime
+  endAt         DateTime
+  status        AppointmentStatus @default(EN_ATTENTE)
+  googleEventId String?
+  notes         String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  property      Property?         @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+
+  @@index([propertyId])
+  @@index([startAt])
+}
+
+model ContactRequest {
+  id         String    @id @default(cuid())
+  propertyId String?
+  firstName  String
+  lastName   String?
+  email      String
+  phone      String?
+  subject    String?
+  message    String
+  createdAt  DateTime  @default(now())
+
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+
+  @@index([propertyId])
+  @@index([createdAt])
+}
+
+model AgencySettings {
+  id                     String   @id @default(cuid())
+  agencyName             String
+  email                  String
+  phone                  String?
+  address                String?
+  appointmentDurationMin Int      @default(30)
+  workDays               Json?
+  startHour              String?
+  endHour                String?
+  googleCalendarId       String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+model GoogleAccount {
+  id           String   @id @default(cuid())
+  email        String
+  accessToken  String
+  refreshToken String?
+  expiryDate   DateTime?
+  calendarId   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+enum PropertyType {
+  MAISON
+  APPARTEMENT
+  IMMEUBLE
+  TERRAIN
+  LOCAL
+  BUREAU
+  AUTRE
+}
+
+enum TransactionType {
+  VENTE
+  LOCATION
+}
+
+enum PropertyStatus {
+  DISPONIBLE
+  SOUS_OFFRE
+  VENDU
+  LOUE
+  ARCHIVE
+}
+
+enum AppointmentStatus {
+  EN_ATTENTE
+  CONFIRME
+  ANNULE
+  TERMINE
+}

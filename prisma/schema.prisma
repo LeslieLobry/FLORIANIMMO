@@ -14,7 +14,7 @@ model AdminUser {
   passwordHash String
   role         String   @default("ADMIN")
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Property {
@@ -133,6 +133,47 @@ model GoogleAccount {
   calendarId   String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model EstimationRequest {
+  id                 Int              @id @default(autoincrement())
+
+  adresse            String
+  ville              String
+  codePostal         String
+  typeBien           String
+
+  surfaceHabitable   Int?
+  surfaceTerrain     Int?
+  nbPieces           Int?
+  chambres           Int?
+  anneeConstruction  Int?
+  dpe                String?
+  etatBien           String?
+  chauffage          String?
+  informations       String?
+
+  prenom             String
+  nom                String
+  email              String
+  telephone          String
+
+  status             EstimationStatus @default(A_FAIRE)
+  noteAdmin          String?
+  lastContactAt      DateTime?
+
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @default(now()) @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum EstimationStatus {
+  A_FAIRE
+  CONTACTE
+  VISITE_PLANIFIEE
+  TRAITE
 }
 
 enum PropertyType {

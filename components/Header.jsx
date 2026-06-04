@@ -11,7 +11,7 @@ export default function Header() {
         <nav className="main-nav">
           <Link href="/">Accueil</Link>
           <Link href="/biens">Biens</Link>
-          <Link href="/acheter">Acheter</Link>
+          {/* <Link href="/acheter">Acheter</Link> */}
           <Link href="/vendre">Vendre</Link>
           <Link href="/estimation">Estimation</Link>
           <Link href="/contact">Contact</Link>

@@ -12,6 +12,7 @@ export default function AdminNav() {
           <Link href="/admin">Dashboard</Link>
           <Link href="/admin/biens">Biens</Link>
           <Link href="/admin/biens/nouveau">Ajouter un bien</Link>
+          <Link href="/admin/estimations">Estimations</Link>
         </nav>
       </div>
     </div>

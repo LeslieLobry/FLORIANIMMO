@@ -1386,3 +1386,477 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+.property-detail-page {
+  background: #f6f7f9;
+}
+
+.property-detail-hero {
+  padding: 50px 0 36px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.breadcrumb {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+  color: #6b7280;
+  font-size: 0.92rem;
+}
+
+.breadcrumb a {
+  color: #0b3f86;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.property-detail-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 30px;
+  align-items: end;
+}
+
+.property-status-badge {
+  display: inline-flex;
+  margin-bottom: 16px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #e0c084;
+  color: #10284c;
+  font-weight: 900;
+  font-size: 0.85rem;
+}
+
+.property-detail-hero h1 {
+  margin: 0 0 12px;
+  color: #10284c;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.08;
+}
+
+.property-location {
+  margin: 0;
+  color: #5f6b76;
+  font-size: 1.1rem;
+}
+
+.property-price-box {
+  min-width: 220px;
+  padding: 22px 26px;
+  border-radius: 20px;
+  background: #10284c;
+  color: #ffffff;
+  text-align: right;
+}
+
+.property-price-box span {
+  display: block;
+  margin-bottom: 6px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.property-price-box strong {
+  font-size: 1.8rem;
+}
+
+.property-detail-content {
+  padding: 36px 0 90px;
+}
+
+.property-main-image {
+  border-radius: 24px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 18px 45px rgba(15, 35, 70, 0.12);
+}
+
+.property-main-photo {
+  height: 520px;
+  background-size: cover;
+  background-position: center;
+}
+
+.property-image-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-weight: 800;
+  background: #d9dee7;
+}
+
+
+.property-thumb {
+  height: 150px;
+  border-radius: 18px;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 12px 28px rgba(15, 35, 70, 0.1);
+}
+
+.property-detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 34px;
+  align-items: start;
+  margin-top: 36px;
+}
+
+.property-features-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.property-features-grid div,
+.property-info-list div {
+  padding: 20px;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 10px 26px rgba(15, 35, 70, 0.08);
+}
+
+.property-features-grid span,
+.property-info-list span {
+  display: block;
+  margin-bottom: 8px;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.property-features-grid strong,
+.property-info-list strong {
+  color: #10284c;
+  font-size: 1.15rem;
+}
+
+.property-description-block,
+.property-info-block,
+.property-contact-card {
+  padding: 34px;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 14px 35px rgba(15, 35, 70, 0.09);
+}
+
+.property-description-block {
+  margin-bottom: 26px;
+}
+
+.property-description-block h2,
+.property-info-block h2,
+.property-contact-card h2 {
+  margin: 0 0 16px;
+  color: #10284c;
+  font-size: 1.8rem;
+}
+
+.property-description-block p,
+.property-contact-card p {
+  margin: 0;
+  color: #5f6b76;
+  line-height: 1.8;
+}
+
+.property-info-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.property-contact-card {
+  position: sticky;
+  top: 100px;
+}
+
+.property-contact-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.property-contact-note {
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 14px;
+  background: #f8f5ef;
+  color: #10284c;
+  font-weight: 700;
+  text-align: center;
+}
+
+@media (max-width: 1000px) {
+  .property-detail-hero-grid,
+  .property-detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .property-price-box {
+    text-align: left;
+  }
+
+  .property-features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .property-contact-card {
+    position: static;
+  }
+}
+
+@media (max-width: 650px) {
+  .property-main-photo {
+    height: 320px;
+  }
+
+ 
+
+  .property-thumb {
+    height: 110px;
+  }
+
+  .property-features-grid,
+  .property-info-list {
+    grid-template-columns: 1fr;
+  }
+
+  .property-description-block,
+  .property-info-block,
+  .property-contact-card {
+    padding: 24px;
+  }
+}
+.property-thumb-button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.property-thumb-button.active .property-thumb {
+  border: 4px solid #e0c084;
+}
+
+.property-thumb {
+  height: 120px;
+  border-radius: 16px;
+  background-size: cover;
+  background-position: center;
+  transition: all 0.2s ease;
+}
+
+.property-thumb:hover {
+  transform: scale(1.03);
+}
+
+/* =========================
+   GALERIE BIEN IMMOBILIER
+========================= */
+
+.property-main-image {
+  margin-bottom: 30px;
+}
+
+.property-gallery-wrapper {
+  width: 100%;
+}
+
+.property-main-photo {
+  width: 100%;
+  height: 550px;
+  border-radius: 24px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: #d9dee7;
+  box-shadow: 0 18px 45px rgba(15, 35, 70, 0.12);
+}
+
+.property-image-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.property-thumbs {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.property-thumb-btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.property-thumb {
+  display: block;
+  width: 100%;
+  height: 120px;
+  border-radius: 16px;
+  background-size: cover;
+  background-position: center;
+  border: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.property-thumb-btn:hover .property-thumb {
+  transform: scale(1.03);
+}
+
+.property-thumb-btn.active .property-thumb {
+  border-color: #e0c084;
+}
+
+@media (max-width: 992px) {
+  .property-main-photo {
+    height: 420px;
+  }
+
+  .property-thumbs {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .property-main-photo {
+    height: 300px;
+  }
+
+  .property-thumbs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .property-thumb {
+    height: 90px;
+  }
+}
+
+/* =========================
+  Admin bien page
+========================= */
+.admin-page-subtitle {
+  margin: 10px 0 0;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.admin-properties-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.admin-property-card-v2 {
+  background: #ffffff;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid #e6ebf2;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+}
+
+.admin-property-thumb {
+  position: relative;
+  height: 210px;
+  background: #eef2f7;
+}
+
+.admin-property-thumb-img {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+}
+
+.admin-property-thumb-empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.admin-status-pill {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.admin-status-pill.is-published {
+  background: #027a48;
+}
+
+.admin-status-pill.is-draft {
+  background: #b54708;
+}
+
+.admin-property-card-body {
+  padding: 20px;
+}
+
+.admin-property-city {
+  margin: 0 0 8px;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.admin-property-card-body h2 {
+  margin: 0 0 12px;
+  color: #112347;
+  font-size: 1.2rem;
+  line-height: 1.35;
+}
+
+.admin-property-meta {
+  margin: 0 0 18px;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.admin-property-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.admin-delete-btn {
+  background: #b42318;
+  color: #ffffff;
+  border-radius: 999px;
+}
+
+.admin-delete-btn:hover {
+  background: #912018;
+}
+
+.admin-delete-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1100px) {
+  .admin-properties-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .admin-properties-grid {
+    grid-template-columns: 1fr;
+  }
+}

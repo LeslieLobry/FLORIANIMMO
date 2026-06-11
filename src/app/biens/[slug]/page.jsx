@@ -1,16 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "../../../../lib/prisma";
-
+import PropertyGallery from "../../../../components/PropertyGallery";
 export async function generateMetadata({ params }) {
   const { slug } = await params;
 
   const property = await prisma.property.findFirst({
     where: {
-      OR: [
-        { slug },
-        { id: slug },
-      ],
+      OR: [{ slug }, { id: slug }],
     },
   });
 
@@ -32,16 +29,11 @@ export default async function PropertyDetailPage({ params }) {
 
   const property = await prisma.property.findFirst({
     where: {
-      OR: [
-        { slug },
-        { id: slug },
-      ],
+      OR: [{ slug }, { id: slug }],
     },
     include: {
       images: {
-        orderBy: {
-          position: "asc",
-        },
+        orderBy: [{ isPrimary: "desc" }, { position: "asc" }],
       },
     },
   });
@@ -50,102 +42,162 @@ export default async function PropertyDetailPage({ params }) {
     notFound();
   }
 
-  return (
-    <section className="section">
-      <div className="container">
-        <div className="breadcrumb">
-          <Link href="/">Accueil</Link>
-          <span> / </span>
-          <Link href="/biens">Biens</Link>
-          <span> / </span>
-          <span>{property.title}</span>
-        </div>
+  
 
-        <div className="property-detail-grid">
-          <div>
-            <div className="property-gallery">
-              {property.images.length > 0 ? (
-                property.images.map((image) => (
-                  <div
-                    key={image.id}
-                    className="property-gallery-image"
-                    style={{ backgroundImage: `url('${image.url}')` }}
-                  />
-                ))
-              ) : (
-                <div className="property-gallery-image property-image-empty">
-                  Aucune image
-                </div>
-              )}
-            </div>
+  return (
+    <main className="property-detail-page">
+      <section className="property-detail-hero">
+        <div className="container">
+          <div className="breadcrumb">
+            <Link href="/">Accueil</Link>
+            <span>/</span>
+            <Link href="/biens">Biens</Link>
+            <span>/</span>
+            <span>{property.title}</span>
           </div>
 
-          <aside className="property-sidebar">
-            <span className="eyebrow">
-              {property.transaction || "Bien"}{" "}
-              {property.status ? `• ${property.status}` : ""}
-            </span>
+          <div className="property-detail-hero-grid">
+            <div>
+              <span className="property-status-badge">
+                {formatTransaction(property.transaction)}
+              </span>
 
-            <h1>{property.title}</h1>
+              <h1>{property.title}</h1>
 
-            <p className="property-location">
-              {property.city}
-              {property.postalCode ? ` (${property.postalCode})` : ""}
-            </p>
-
-            <p className="property-price-detail">
-              {formatPrice(property.price)}
-            </p>
-
-            <ul className="property-features-list">
-              <li>
-                <strong>Type :</strong> {property.type || "Non précisé"}
-              </li>
-              <li>
-                <strong>Surface :</strong>{" "}
-                {property.surface ? `${property.surface} m²` : "Non précisée"}
-              </li>
-              <li>
-                <strong>Pièces :</strong>{" "}
-                {property.rooms || "Non précisé"}
-              </li>
-              <li>
-                <strong>Chambres :</strong>{" "}
-                {property.bedrooms || "Non précisé"}
-              </li>
-              <li>
-                <strong>Salles de bain :</strong>{" "}
-                {property.bathrooms || "Non précisé"}
-              </li>
-              <li>
-                <strong>DPE :</strong> {property.dpe || "Non précisé"}
-              </li>
-              <li>
-                <strong>GES :</strong> {property.ges || "Non précisé"}
-              </li>
-            </ul>
-
-            <div className="property-actions">
-              <Link href="/contact" className="btn btn-gold">
-                Contacter l’agence
-              </Link>
-
-              <Link
-                href={`/rendez-vous?property=${property.slug || property.id}`}
-                className="btn btn-outline"
-              >
-                Prendre rendez-vous
-              </Link>
+              <p className="property-location">
+                {property.city || "Ville non précisée"}
+                {property.postalCode ? ` (${property.postalCode})` : ""}
+              </p>
             </div>
-          </aside>
-        </div>
 
-        <div className="property-description-block">
-          <h2>Description</h2>
-          <p>{property.description || "Description bientôt disponible."}</p>
+            <div className="property-price-box">
+              <span>Prix</span>
+              <strong>{formatPrice(property.price)}</strong>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <section className="property-detail-content">
+        <div className="container">
+        <div className="property-main-image">
+  <PropertyGallery images={property.images} />
+</div>
+          <div className="property-detail-layout">
+            <div className="property-detail-left">
+              <div className="property-features-grid">
+                <div>
+                  <span>Surface</span>
+                  <strong>
+                    {property.surface ? `${property.surface} m²` : "NC"}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Pièces</span>
+                  <strong>{property.rooms || "NC"}</strong>
+                </div>
+
+                <div>
+                  <span>Chambres</span>
+                  <strong>{property.bedrooms || "NC"}</strong>
+                </div>
+
+                <div>
+                  <span>Type</span>
+                  <strong>{formatValue(property.type)}</strong>
+                </div>
+              </div>
+
+              <div className="property-description-block">
+                <span className="eyebrow">Description</span>
+                <h2>À propos de ce bien</h2>
+
+                <p>
+                  {property.description || "Description bientôt disponible."}
+                </p>
+              </div>
+
+              <div className="property-info-block">
+                <h2>Caractéristiques</h2>
+
+                <div className="property-info-list">
+                  <div>
+                    <span>Transaction</span>
+                    <strong>{formatTransaction(property.transaction)}</strong>
+                  </div>
+
+                  <div>
+                    <span>Statut</span>
+                    <strong>{formatValue(property.status)}</strong>
+                  </div>
+
+                  <div>
+                    <span>Surface</span>
+                    <strong>
+                      {property.surface ? `${property.surface} m²` : "Non précisée"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Pièces</span>
+                    <strong>{property.rooms || "Non précisé"}</strong>
+                  </div>
+
+                  <div>
+                    <span>Chambres</span>
+                    <strong>{property.bedrooms || "Non précisé"}</strong>
+                  </div>
+
+                  <div>
+                    <span>Salles de bain</span>
+                    <strong>{property.bathrooms || "Non précisé"}</strong>
+                  </div>
+
+                  <div>
+                    <span>DPE</span>
+                    <strong>{property.dpe || "Non précisé"}</strong>
+                  </div>
+
+                  <div>
+                    <span>GES</span>
+                    <strong>{property.ges || "Non précisé"}</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <aside className="property-contact-card">
+              <span className="eyebrow">Intéressé par ce bien ?</span>
+
+              <h2>Contactez Florian</h2>
+
+              <p>
+                Vous souhaitez visiter ce bien ou obtenir plus d’informations ?
+                Florian vous accompagne dans votre projet immobilier.
+              </p>
+
+              <div className="property-contact-actions">
+                <Link href="/contact" className="btn btn-gold">
+                  Contacter l’agence
+                </Link>
+
+                <Link
+                  href={`/rendez-vous?property=${property.slug || property.id}`}
+                  className="btn btn-outline"
+                >
+                  Prendre rendez-vous
+                </Link>
+              </div>
+
+              <div className="property-contact-note">
+                Réponse rapide et accompagnement personnalisé.
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
 
@@ -157,4 +209,16 @@ function formatPrice(price) {
     currency: "EUR",
     maximumFractionDigits: 0,
   }).format(Number(price));
+}
+
+function formatTransaction(transaction) {
+  if (!transaction) return "Bien disponible";
+  if (transaction === "VENTE") return "À vendre";
+  if (transaction === "LOCATION") return "À louer";
+  return transaction;
+}
+
+function formatValue(value) {
+  if (!value) return "Non précisé";
+  return String(value).replaceAll("_", " ");
 }

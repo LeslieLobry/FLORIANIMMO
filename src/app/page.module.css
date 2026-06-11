@@ -17,7 +17,249 @@
   font-family: var(--font-geist-sans);
   background-color: var(--background);
 }
+.home-intro {
+  padding: 80px 0;
+  background: #ffffff;
+}
 
+.home-intro .container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.eyebrow {
+  display: inline-block;
+  margin-bottom: 14px;
+  color: #c6a45d;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.home-intro h1 {
+  max-width: 850px;
+  margin: 0 auto 20px;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1.1;
+  color: #1f2933;
+}
+
+.home-intro p {
+  max-width: 720px;
+  margin: 0 auto;
+  color: #5f6b76;
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+.home-intro-actions {
+  margin-top: 34px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 24px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: 0.25s ease;
+}
+
+.btn-gold {
+  background: #c6a45d;
+  color: #ffffff;
+}
+
+.btn-gold:hover {
+  background: #ad8d48;
+}
+
+.btn-outline {
+  border: 1px solid #c6a45d;
+  color: #c6a45d;
+  background: transparent;
+}
+
+.btn-outline:hover {
+  background: #c6a45d;
+  color: #ffffff;
+}
+
+.home-trust {
+  position: relative;
+  padding: 100px 0;
+  background: linear-gradient(
+    135deg,
+    #10284c 0%,
+    #183762 50%,
+    #10284c 100%
+  );
+  overflow: hidden;
+}
+
+.home-trust::before {
+  content: "";
+  position: absolute;
+  top: -150px;
+  right: -150px;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: rgba(224, 192, 132, 0.15);
+}
+
+.home-trust::after {
+  content: "";
+  position: absolute;
+  bottom: -180px;
+  left: -180px;
+  width: 450px;
+  height: 450px;
+  border-radius: 50%;
+  background: rgba(224, 192, 132, 0.08);
+}
+
+.home-trust .container {
+  position: relative;
+  z-index: 2;
+}
+
+.home-trust-head {
+  max-width: 800px;
+  margin: 0 auto 60px;
+  text-align: center;
+}
+
+.home-trust-head .eyebrow {
+  color: #e0c084;
+}
+
+.home-trust-head h2 {
+  margin: 15px 0;
+  color: #ffffff;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1.1;
+}
+
+.home-trust-head p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.home-trust-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.trust-card {
+  padding: 36px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: all 0.3s ease;
+}
+
+.trust-card:hover {
+  transform: translateY(-8px);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.trust-card-featured {
+  background: #ffffff;
+  color: #10284c;
+  transform: scale(1.04);
+}
+
+.trust-card-featured:hover {
+  transform: scale(1.04) translateY(-8px);
+}
+
+.trust-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #e0c084;
+  color: #10284c;
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 24px;
+}
+
+.trust-card h3 {
+  margin: 0 0 15px;
+  color: inherit;
+  font-size: 1.4rem;
+}
+
+.trust-card p {
+  margin: 0;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.trust-card-featured p {
+  color: #5f6b76;
+}
+
+@media (max-width: 992px) {
+  .home-trust-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trust-card-featured {
+    transform: none;
+  }
+
+  .trust-card-featured:hover {
+    transform: translateY(-8px);
+  }
+}
+
+.trust-card {
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 22px;
+  box-shadow: 0 18px 45px rgba(31, 41, 51, 0.08);
+}
+
+.trust-card strong {
+  display: block;
+  margin-bottom: 10px;
+  color: #1f2933;
+  font-size: 1.15rem;
+}
+
+.trust-card p {
+  margin: 0;
+  color: #5f6b76;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .home-intro {
+    padding: 55px 0;
+  }
+
+  .home-trust-grid {
+    grid-template-columns: 1fr;
+  }
+}
 .main {
   display: flex;
   flex: 1;

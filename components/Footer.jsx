@@ -18,7 +18,7 @@ export default function Footer() {
             <li><Link href="/">Accueil</Link></li>
             <li><Link href="/biens">Biens</Link></li>
             {/* <li><Link href="/acheter">Acheter</Link></li> */}
-            <li><Link href="/vendre">Vendre</Link></li>
+            <li><Link href="/rdv">Rendez-vous</Link></li>
             <li><Link href="/contact">Contact</Link></li>
           </ul>
         </div>

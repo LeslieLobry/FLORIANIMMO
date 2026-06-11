@@ -11,12 +11,10 @@ export default function Header() {
         <nav className="main-nav">
           <Link href="/">Accueil</Link>
           <Link href="/biens">Biens</Link>
-          {/* <Link href="/acheter">Acheter</Link> */}
-          <Link href="/vendre">Vendre</Link>
+          <Link href="/rdv">Rendez-vous</Link>
           <Link href="/estimation">Estimation</Link>
           <Link href="/contact">Contact</Link>
         </nav>
-
         <Link href="/contact" className="btn btn-gold">
           Prendre contact
         </Link>

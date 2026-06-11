@@ -1,10 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma } from "../../../lib/prisma";
+import { prisma } from "../../../../lib/prisma";
 
 export async function generateMetadata({ params }) {
-  const property = await prisma.property.findUnique({
-    where: { slug: params.slug },
+  const { slug } = await params;
+
+  const property = await prisma.property.findFirst({
+    where: {
+      OR: [
+        { slug },
+        { id: slug },
+      ],
+    },
   });
 
   if (!property) {
@@ -21,8 +28,15 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function PropertyDetailPage({ params }) {
-  const property = await prisma.property.findUnique({
-    where: { slug: params.slug },
+  const { slug } = await params;
+
+  const property = await prisma.property.findFirst({
+    where: {
+      OR: [
+        { slug },
+        { id: slug },
+      ],
+    },
     include: {
       images: {
         orderBy: {
@@ -32,7 +46,7 @@ export default async function PropertyDetailPage({ params }) {
     },
   });
 
-  if (!property || !property.published || property.status === "ARCHIVE") {
+  if (!property) {
     notFound();
   }
 
@@ -68,7 +82,8 @@ export default async function PropertyDetailPage({ params }) {
 
           <aside className="property-sidebar">
             <span className="eyebrow">
-              {property.transaction} • {property.status}
+              {property.transaction || "Bien"}{" "}
+              {property.status ? `• ${property.status}` : ""}
             </span>
 
             <h1>{property.title}</h1>
@@ -83,20 +98,42 @@ export default async function PropertyDetailPage({ params }) {
             </p>
 
             <ul className="property-features-list">
-              <li><strong>Type :</strong> {property.type}</li>
-              <li><strong>Surface :</strong> {property.surface ? `${property.surface} m²` : "Non précisée"}</li>
-              <li><strong>Pièces :</strong> {property.rooms || "Non précisé"}</li>
-              <li><strong>Chambres :</strong> {property.bedrooms || "Non précisé"}</li>
-              <li><strong>Salles de bain :</strong> {property.bathrooms || "Non précisé"}</li>
-              <li><strong>DPE :</strong> {property.dpe || "Non précisé"}</li>
-              <li><strong>GES :</strong> {property.ges || "Non précisé"}</li>
+              <li>
+                <strong>Type :</strong> {property.type || "Non précisé"}
+              </li>
+              <li>
+                <strong>Surface :</strong>{" "}
+                {property.surface ? `${property.surface} m²` : "Non précisée"}
+              </li>
+              <li>
+                <strong>Pièces :</strong>{" "}
+                {property.rooms || "Non précisé"}
+              </li>
+              <li>
+                <strong>Chambres :</strong>{" "}
+                {property.bedrooms || "Non précisé"}
+              </li>
+              <li>
+                <strong>Salles de bain :</strong>{" "}
+                {property.bathrooms || "Non précisé"}
+              </li>
+              <li>
+                <strong>DPE :</strong> {property.dpe || "Non précisé"}
+              </li>
+              <li>
+                <strong>GES :</strong> {property.ges || "Non précisé"}
+              </li>
             </ul>
 
             <div className="property-actions">
               <Link href="/contact" className="btn btn-gold">
                 Contacter l’agence
               </Link>
-              <Link href={`/rendez-vous?property=${property.slug}`} className="btn btn-outline">
+
+              <Link
+                href={`/rendez-vous?property=${property.slug || property.id}`}
+                className="btn btn-outline"
+              >
                 Prendre rendez-vous
               </Link>
             </div>
@@ -113,6 +150,8 @@ export default async function PropertyDetailPage({ params }) {
 }
 
 function formatPrice(price) {
+  if (!price) return "Prix sur demande";
+
   return new Intl.NumberFormat("fr-FR", {
     style: "currency",
     currency: "EUR",

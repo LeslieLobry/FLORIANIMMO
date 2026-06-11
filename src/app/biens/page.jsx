@@ -2,23 +2,15 @@ import Link from "next/link";
 import { prisma } from "../../../lib/prisma";
 
 export const metadata = {
-  title: "Biens immobiliers | Florian Immo",
-  description: "Découvrez tous les biens immobiliers proposés par Florian Immo.",
+  title: "Nos biens | Florian Immo",
+  description: "Découvrez les biens immobiliers proposés par Florian Immo.",
 };
 
 export default async function BiensPage() {
   const properties = await prisma.property.findMany({
-    where: {
-      published: true,
-      status: {
-        not: "ARCHIVE",
-      },
-    },
     include: {
       images: {
-        orderBy: {
-          position: "asc",
-        },
+        orderBy: [{ isPrimary: "desc" }, { position: "asc" }],
         take: 1,
       },
     },
@@ -28,67 +20,75 @@ export default async function BiensPage() {
   });
 
   return (
-    <section className="section">
+    <section className="biens-page">
       <div className="container">
-        <div className="page-hero">
+        <div className="biens-header">
           <span className="eyebrow">Nos biens</span>
-          <h1>Découvrez notre sélection immobilière</h1>
+          <h1>Découvrez nos biens disponibles</h1>
           <p>
-            Parcourez les biens disponibles à la vente ou à la location et
-            contactez-nous pour organiser une visite.
+            Sélection de maisons, appartements et biens professionnels proposés
+            par Florian Immo.
           </p>
         </div>
 
         {properties.length === 0 ? (
           <div className="empty-state">
             <h2>Aucun bien disponible pour le moment</h2>
-            <p>Les biens ajoutés depuis l’admin apparaîtront ici.</p>
+            <p>Les biens ajoutés depuis l’administration apparaîtront ici.</p>
           </div>
         ) : (
-          <div className="property-grid">
-            {properties.map((property) => {
-              const image = property.images[0]?.url || null;
+          <div className="biens-grid">
+            {properties.map((property, index) => {
+              const image = property.images?.[0]?.url;
+              const propertyUrl = `/biens/${property.slug || property.id}`;
 
               return (
-                <article className="property-card" key={property.id}>
-                  {image ? (
-                    <div
-                      className="property-image-real"
-                      style={{ backgroundImage: `url('${image}')` }}
-                    />
-                  ) : (
-                    <div className="property-image-real property-image-empty">
-                      Aucune image
+                <article className="bien-card" key={property.id}>
+                  <Link href={propertyUrl} className="bien-image-wrap">
+                    {index < 4 && <span className="bien-badge">Nouveau</span>}
+
+                    {image ? (
+                      <div
+                        className="bien-image"
+                        style={{ backgroundImage: `url('${image}')` }}
+                      />
+                    ) : (
+                      <div className="bien-image bien-image-empty">
+                        Aucune image
+                      </div>
+                    )}
+
+                    <div className="bien-price">
+                      {formatPrice(property.price)}
                     </div>
-                  )}
+                  </Link>
 
-                  <div className="property-content">
-                    <p className="property-city">
-                      {property.city}
+                  <div className="bien-content">
+                    <h2>
+                      <Link href={propertyUrl}>
+                        {property.title || "Bien immobilier"}
+                      </Link>
+                    </h2>
+
+                    <p className="bien-location">
+                      {property.city || "Ville non précisée"}
                       {property.postalCode ? ` (${property.postalCode})` : ""}
+                      {property.reference ? ` · Réf. ${property.reference}` : ""}
                     </p>
 
-                    <h2 className="property-title-card">{property.title}</h2>
-
-                    <p className="property-meta">
-                      {property.surface ? `${property.surface} m²` : "Surface NC"}
-                      {" • "}
-                      {property.rooms ? `${property.rooms} pièces` : "Pièces NC"}
-                      {" • "}
-                      {property.type}
-                    </p>
+                    <div className="bien-infos">
+                      <span>{property.surface ? `${property.surface} m²` : "Surface NC"}</span>
+                      <span>{property.rooms ? `${property.rooms} pièces` : "Pièces NC"}</span>
+                      <span>{property.bedrooms ? `${property.bedrooms} ch.` : "Ch. NC"}</span>
+                    </div>
 
                     {property.shortDesc ? (
-                      <p className="property-desc-card">{property.shortDesc}</p>
+                      <p className="bien-desc">{property.shortDesc}</p>
                     ) : null}
 
-                    <div className="property-bottom">
-                      <strong>{formatPrice(property.price)}</strong>
-
-                      <Link href={`/biens/${property.slug}`} className="btn btn-small">
-                        Voir le bien
-                      </Link>
-                    </div>
+                    <Link href={propertyUrl} className="bien-btn">
+                      Voir le détail
+                    </Link>
                   </div>
                 </article>
               );
@@ -101,6 +101,8 @@ export default async function BiensPage() {
 }
 
 function formatPrice(price) {
+  if (!price) return "Prix sur demande";
+
   return new Intl.NumberFormat("fr-FR", {
     style: "currency",
     currency: "EUR",

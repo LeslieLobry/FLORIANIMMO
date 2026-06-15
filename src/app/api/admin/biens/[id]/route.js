@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../../../../lib/prisma";
+import { prisma } from "@/lib/prisma";
 
-export async function DELETE(req, { params }) {
+export async function DELETE(req, context) {
   try {
-    const { id } = await params;
+    const { id } = await context.params;
+
+    if (!id) {
+      return NextResponse.json({ message: "ID manquant." }, { status: 400 });
+    }
 
     const property = await prisma.property.findUnique({
       where: { id },
-      include: {
-        images: true,
-      },
+      include: { images: true },
     });
 
     if (!property) {
@@ -20,9 +22,7 @@ export async function DELETE(req, { params }) {
     }
 
     await prisma.propertyImage.deleteMany({
-      where: {
-        propertyId: id,
-      },
+      where: { propertyId: id },
     });
 
     await prisma.property.delete({
@@ -41,10 +41,15 @@ export async function DELETE(req, { params }) {
     );
   }
 }
-export async function PUT(req, { params }) {
+
+export async function PUT(req, context) {
   try {
-    const { id } = await params;
+    const { id } = await context.params;
     const body = await req.json();
+
+    if (!id) {
+      return NextResponse.json({ message: "ID manquant." }, { status: 400 });
+    }
 
     const property = await prisma.property.update({
       where: { id },
@@ -72,14 +77,14 @@ export async function PUT(req, { params }) {
       },
     });
 
-    return Response.json({
+    return NextResponse.json({
       message: "Bien modifié avec succès.",
       property,
     });
   } catch (error) {
     console.error("PUT /api/admin/biens/[id]", error);
 
-    return Response.json(
+    return NextResponse.json(
       { message: "Erreur lors de la modification du bien." },
       { status: 500 }
     );

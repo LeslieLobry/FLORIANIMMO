@@ -1860,3 +1860,141 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================
+  Page rendez-vous
+========================= */
+
+.contact-form {
+  max-width: 900px;
+  margin: 40px auto 0;
+  padding: 40px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #d9d9d9;
+  border-radius: 12px;
+  font-size: 1rem;
+  background: #fff;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #c9a76b;
+  box-shadow: 0 0 0 4px rgba(201, 167, 107, 0.15);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 140px;
+}
+
+.btn.btn-gold {
+  background: #c9a76b;
+  color: #fff;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn.btn-gold:hover {
+  background: #b69357;
+  transform: translateY(-2px);
+}
+
+.btn.btn-gold:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-success {
+  background: #e8f8ec;
+  color: #1f7a3d;
+  border: 1px solid #b8e2c3;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.form-error {
+  background: #fff0f0;
+  color: #c62828;
+  border: 1px solid #f3b0b0;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.page-head {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.page-head .eyebrow {
+  display: inline-block;
+  color: #c9a76b;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+
+.page-head h1 {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  color: #111;
+}
+
+.page-head p {
+  max-width: 700px;
+  margin: 0 auto;
+  color: #666;
+  line-height: 1.7;
+}
+
+@media (max-width: 768px) {
+  .contact-form {
+    padding: 25px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-head h1 {
+    font-size: 2rem;
+  }
+}

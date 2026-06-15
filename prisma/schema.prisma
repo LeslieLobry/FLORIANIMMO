@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -168,7 +168,17 @@ model EstimationRequest {
   @@index([status])
   @@index([createdAt])
 }
-
+model RendezVousRequest {
+  id             Int      @id @default(autoincrement())
+  nom            String
+  email          String
+  telephone      String?
+  sujet          String?
+  dateSouhaitee  String?
+  heureSouhaitee String?
+  message        String?
+  createdAt      DateTime @default(now())
+}
 enum EstimationStatus {
   A_FAIRE
   CONTACTE

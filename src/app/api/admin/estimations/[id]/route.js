@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../../../../lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 const STATUTS_AUTORISES = [
   "A_FAIRE",
@@ -7,7 +7,6 @@ const STATUTS_AUTORISES = [
   "VISITE_PLANIFIEE",
   "TRAITE",
 ];
-
 export async function PATCH(req, context) {
   try {
     const params = await context.params;

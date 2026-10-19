@@ -39,7 +39,7 @@ export default function Hero() {
           <div className="agent-card">
             <div className="agent-image-wrap">
               <Image
-                src="/uploads/florian.webp"
+                src="/uploads/florian.png"
                 alt="Florian, conseiller immobilier"
                 width={420}
                 height={520}

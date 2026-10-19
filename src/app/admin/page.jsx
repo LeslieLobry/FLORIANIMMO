@@ -1,4 +1,7 @@
+
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import AdminNav from "../../../components/admin/AdminNav";
 import DeletePropertyButton from "../../../components/admin/DeletePropertyButton";
 import { prisma } from "../../../lib/prisma";
@@ -8,6 +11,12 @@ export const metadata = {
 };
 
 export default async function AdminPropertiesPage() {
+  const session = await auth();
+
+  if (session?.user?.role !== "ADMIN") {
+    redirect("/admin/login");
+  }
+
   const properties = await prisma.property.findMany({
     orderBy: {
       createdAt: "desc",
@@ -19,6 +28,7 @@ export default async function AdminPropertiesPage() {
       },
     },
   });
+
 
   return (
     <>

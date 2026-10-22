@@ -2,12 +2,15 @@ import Link from "next/link";
 import Image from "next/image";
 import AdminNav from "../../../../components/admin/AdminNav";
 import { prisma } from "../../../../lib/prisma";
+import { requireAdmin } from "@/lib/requireAdmin";
 
 export const metadata = {
   title: "Admin Biens | Florian Immo",
 };
 
 export default async function AdminPropertiesPage() {
+  await requireAdmin();
+
   const properties = await prisma.property.findMany({
     include: {
       images: {

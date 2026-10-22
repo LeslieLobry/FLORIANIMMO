@@ -14,7 +14,7 @@ model AdminUser {
   passwordHash String
   role         String   @default("ADMIN")
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now()) @updatedAt
+  updatedAt    DateTime @updatedAt
 }
 
 model Property {
@@ -29,27 +29,38 @@ model Property {
   address     String?
   latitude    Float?
   longitude   Float?
+
+  // Surfaces et orientation
   surface     Float?
-  rooms       Int?
-  bedrooms    Int?
-  bathrooms   Int?
+  landSurface Float?
+  orientation String?
+
+  rooms     Int?
+  bedrooms  Int?
+  bathrooms Int?
+
   shortDesc   String?
   description String?
   features    Json?
-  dpe         String?
-  ges         String?
-  status      PropertyStatus  @default(DISPONIBLE)
-  featured    Boolean         @default(false)
-  published   Boolean         @default(false)
-  reference   String?
-  yearBuilt   Int?
-  floor       Int?
-  hasGarden   Boolean         @default(false)
-  hasGarage   Boolean         @default(false)
-  hasTerrace  Boolean         @default(false)
-  hasElevator Boolean         @default(false)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+
+  dpe String?
+  ges String?
+
+  status    PropertyStatus @default(DISPONIBLE)
+  featured  Boolean        @default(false)
+  published Boolean        @default(false)
+
+  reference String?
+  yearBuilt Int?
+  floor     Int?
+
+  hasGarden   Boolean @default(false)
+  hasGarage   Boolean @default(false)
+  hasTerrace  Boolean @default(false)
+  hasElevator Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   images       PropertyImage[]
   appointments Appointment[]
@@ -83,8 +94,9 @@ model Appointment {
   status        AppointmentStatus @default(EN_ATTENTE)
   googleEventId String?
   notes         String?
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   property Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
 
@@ -110,18 +122,19 @@ model ContactRequest {
 }
 
 model AgencySettings {
-  id                     String   @id @default(cuid())
+  id                     String  @id @default(cuid())
   agencyName             String
   email                  String
   phone                  String?
   address                String?
-  appointmentDurationMin Int      @default(30)
+  appointmentDurationMin Int     @default(30)
   workDays               Json?
   startHour              String?
   endHour                String?
   googleCalendarId       String?
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model GoogleAccount {
@@ -131,8 +144,9 @@ model GoogleAccount {
   refreshToken String?
   expiryDate   DateTime?
   calendarId   String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model EstimationRequest {
@@ -163,7 +177,7 @@ model EstimationRequest {
   lastContactAt DateTime?
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  updatedAt DateTime @updatedAt
 
   @@index([status])
   @@index([createdAt])
@@ -179,6 +193,37 @@ model RendezVousRequest {
   heureSouhaitee String?
   message        String?
   createdAt      DateTime @default(now())
+}
+
+model Article {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  excerpt     String?
+  content     String    @db.Text
+  coverImage  String?
+  author      String?
+  published   Boolean   @default(false)
+  featured    Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([published, publishedAt])
+}
+
+model Partner {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+  logo        String?
+  website     String?
+  position    Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published, position])
 }
 
 enum EstimationStatus {
@@ -216,35 +261,4 @@ enum AppointmentStatus {
   CONFIRME
   ANNULE
   TERMINE
-}
-
-model Article {
-  id          String    @id @default(cuid())
-  title       String
-  slug        String    @unique
-  excerpt     String?
-  content     String    @db.Text
-  coverImage  String?
-  author      String?
-  published   Boolean   @default(false)
-  featured    Boolean   @default(false)
-  publishedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  @@index([published, publishedAt])
-}
-
-model Partner {
-  id          String   @id @default(cuid())
-  name        String
-  description String?  @db.Text
-  logo        String?
-  website     String?
-  position    Int      @default(0)
-  published   Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([published, position])
 }

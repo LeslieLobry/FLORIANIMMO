@@ -9,7 +9,7 @@ import { usePathname } from "next/navigation";
 const links = [
   { href: "/", label: "Accueil" },
   { href: "/biens", label: "Biens" },
-  { href: "/rdv", label: "Rendez-vous" },
+  // { href: "/rdv", label: "Rendez-vous" },
   { href: "/estimation", label: "Estimation" },
   { href: "/actualites", label: "Actualités" },
   {

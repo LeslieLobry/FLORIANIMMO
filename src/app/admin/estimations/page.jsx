@@ -1,6 +1,6 @@
-import AdminNav from "../../../../../components/admin/AdminNav";
-import EstimationActions from "../../../../../components/admin/EstimationActions";
-import { prisma } from "../../../../../lib/prisma";
+import AdminNav from "../../../../components/admin/AdminNav";
+import EstimationActions from "../../../../components/admin/EstimationActions";
+import { prisma } from "../../../../lib/prisma";
 import { requireAdmin } from "@/lib/requireAdmin";
 export const metadata = {
   title: "Admin Estimations | Florian Immo",

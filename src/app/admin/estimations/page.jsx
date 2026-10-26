@@ -13,6 +13,7 @@ const statusLabels = {
   TRAITE: "Traité",
 };
 
+
 export default async function AdminEstimationsPage() {
   await requireAdmin();
   const estimations = await prisma.estimationRequest.findMany({

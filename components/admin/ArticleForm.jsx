@@ -3,21 +3,25 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
-export default function ArticleForm() {
+export default function ArticleForm({ article = null }) {
   const router = useRouter();
+  const isEditing = Boolean(article?.id);
 
   const [form, setForm] = useState({
-    title: "",
-    excerpt: "",
-    content: "",
-    author: "Florian Immo",
-    published: false,
-    featured: false,
+    title: article?.title ?? "",
+    excerpt: article?.excerpt ?? "",
+    content: article?.content ?? "",
+    author: article?.author ?? "Florian Immo",
+    published: article?.published ?? false,
+    featured: article?.featured ?? false,
   });
 
   const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState("");
+  const [preview, setPreview] = useState(
+    article?.coverImage ?? ""
+  );
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -33,16 +37,17 @@ export default function ArticleForm() {
 
   function handleImageChange(e) {
     const file = e.target.files?.[0];
-
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
       setError("Veuillez choisir une image.");
+      e.target.value = "";
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
       setError("L'image ne doit pas dépasser 5 Mo.");
+      e.target.value = "";
       return;
     }
 
@@ -50,16 +55,16 @@ export default function ArticleForm() {
     setImage(file);
 
     const reader = new FileReader();
-
     reader.onloadend = () => {
       setPreview(reader.result);
     };
-
     reader.readAsDataURL(file);
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
+
+    if (loading) return;
 
     setLoading(true);
     setError("");
@@ -75,16 +80,22 @@ export default function ArticleForm() {
         formData.append("image", image);
       }
 
-      const res = await fetch("/api/admin/articles", {
-        method: "POST",
+      const url = isEditing
+        ? `/api/admin/articles/${article.id}`
+        : "/api/admin/articles";
+
+      const res = await fetch(url, {
+        method: isEditing ? "PATCH" : "POST",
         body: formData,
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
         throw new Error(
-          data.message || "Erreur lors de l'enregistrement."
+          data.message ||
+          data.error ||
+          "Erreur lors de l'enregistrement."
         );
       }
 
@@ -108,14 +119,21 @@ export default function ArticleForm() {
             <p className="premium-kicker">
               Actualités immobilières
             </p>
-            <h2>Informations de l'article</h2>
+            <h2>
+              {isEditing
+                ? "Modifier l'article"
+                : "Informations de l'article"}
+            </h2>
           </div>
         </div>
 
         <div className="admin-form-grid">
           <div className="admin-field admin-field-full">
-            <label>Titre de l'article *</label>
+            <label htmlFor="article-title">
+              Titre de l'article *
+            </label>
             <input
+              id="article-title"
               name="title"
               value={form.title}
               onChange={handleChange}
@@ -125,8 +143,9 @@ export default function ArticleForm() {
           </div>
 
           <div className="admin-field admin-field-full">
-            <label>Résumé</label>
+            <label htmlFor="article-excerpt">Résumé</label>
             <textarea
+              id="article-excerpt"
               name="excerpt"
               value={form.excerpt}
               onChange={handleChange}
@@ -136,8 +155,11 @@ export default function ArticleForm() {
           </div>
 
           <div className="admin-field admin-field-full">
-            <label>Contenu de l'article *</label>
+            <label htmlFor="article-content">
+              Contenu de l'article *
+            </label>
             <textarea
+              id="article-content"
               name="content"
               value={form.content}
               onChange={handleChange}
@@ -148,8 +170,9 @@ export default function ArticleForm() {
           </div>
 
           <div className="admin-field">
-            <label>Auteur</label>
+            <label htmlFor="article-author">Auteur</label>
             <input
+              id="article-author"
               name="author"
               value={form.author}
               onChange={handleChange}
@@ -161,18 +184,21 @@ export default function ArticleForm() {
       <div className="premium-section">
         <div className="premium-section-head">
           <div>
-            <p className="premium-kicker">
-              Illustration
-            </p>
+            <p className="premium-kicker">Illustration</p>
             <h2>Photo principale</h2>
           </div>
         </div>
 
         <div className="admin-form-grid">
           <div className="admin-field admin-field-full">
-            <label>Choisir une photo</label>
+            <label htmlFor="article-image">
+              {isEditing
+                ? "Changer la photo (facultatif)"
+                : "Choisir une photo"}
+            </label>
 
             <input
+              id="article-image"
               type="file"
               accept="image/*"
               onChange={handleImageChange}
@@ -180,6 +206,8 @@ export default function ArticleForm() {
 
             <p>
               Formats image acceptés — 5 Mo maximum.
+              {isEditing &&
+                " Sans nouvelle photo, l'image actuelle sera conservée."}
             </p>
           </div>
         </div>
@@ -202,9 +230,7 @@ export default function ArticleForm() {
       <div className="premium-section">
         <div className="premium-section-head">
           <div>
-            <p className="premium-kicker">
-              Publication
-            </p>
+            <p className="premium-kicker">Publication</p>
             <h2>Options de l'article</h2>
           </div>
         </div>
@@ -241,10 +267,19 @@ export default function ArticleForm() {
       </div>
 
       {error && (
-        <p className="form-error">{error}</p>
+        <p className="form-error" role="alert">
+          {error}
+        </p>
       )}
 
       <div className="premium-form-actions">
+        <Link
+          href="/admin/articles"
+          className="btn btn-outline"
+        >
+          Annuler
+        </Link>
+
         <button
           type="submit"
           className="btn btn-gold premium-submit-btn"
@@ -252,6 +287,8 @@ export default function ArticleForm() {
         >
           {loading
             ? "Enregistrement..."
+            : isEditing
+            ? "Enregistrer les modifications"
             : form.published
             ? "Publier l'article"
             : "Enregistrer le brouillon"}

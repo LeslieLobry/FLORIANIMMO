@@ -1,7 +1,7 @@
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
 import AdminNav from "../../../components/admin/AdminNav";
 import DeletePropertyButton from "../../../components/admin/DeletePropertyButton";
 import { prisma } from "../../../lib/prisma";

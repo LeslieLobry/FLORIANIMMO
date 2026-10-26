@@ -10,6 +10,8 @@ const initialState = {
   city: "",
   postalCode: "",
   surface: "",
+  landSurface: "",
+  orientation: "",
   rooms: "",
   bedrooms: "",
   bathrooms: "",
@@ -196,7 +198,7 @@ export default function PropertyForm() {
           </div>
 
           <div className="admin-field">
-            <label htmlFor="surface">Surface (m²)</label>
+            <label htmlFor="surface">Surface habitable (m²)</label>
             <input
               id="surface"
               name="surface"
@@ -205,6 +207,40 @@ export default function PropertyForm() {
               onChange={handleChange}
               placeholder="Ex : 120"
             />
+          </div>
+
+          <div className="admin-field">
+            <label htmlFor="landSurface">Surface du terrain (m²)</label>
+            <input
+              id="landSurface"
+              name="landSurface"
+              type="number"
+              min="0"
+              step="any"
+              value={form.landSurface}
+              onChange={handleChange}
+              placeholder="Ex : 650"
+            />
+          </div>
+
+          <div className="admin-field">
+            <label htmlFor="orientation">Orientation</label>
+            <select
+              id="orientation"
+              name="orientation"
+              value={form.orientation}
+              onChange={handleChange}
+            >
+              <option value="">Non renseignée</option>
+              <option value="NORD">Nord</option>
+              <option value="NORD_EST">Nord-Est</option>
+              <option value="EST">Est</option>
+              <option value="SUD_EST">Sud-Est</option>
+              <option value="SUD">Sud</option>
+              <option value="SUD_OUEST">Sud-Ouest</option>
+              <option value="OUEST">Ouest</option>
+              <option value="NORD_OUEST">Nord-Ouest</option>
+            </select>
           </div>
 
           <div className="admin-field">

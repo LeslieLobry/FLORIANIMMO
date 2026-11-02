@@ -6,6 +6,25 @@ import PropertyGallery from "@/components/PropertyGallery";
 
 export const dynamic = "force-dynamic";
 
+const statusConfig = {
+  DISPONIBLE: {
+    label: "Disponible",
+    color: "#57856a",
+  },
+  SOUS_OFFRE: {
+    label: "SOUS OFFRE",
+    color: "#c59036",
+  },
+  VENDU: {
+    label: "VENDU",
+    color: "#b42e38",
+  },
+  LOUE: {
+    label: "LOUÉ",
+    color: "#597e9b",
+  },
+};
+
 async function getProperty(slug) {
   return prisma.property.findFirst({
     where: {
@@ -51,6 +70,32 @@ export default async function PropertyDetailPage({ params }) {
     notFound();
   }
 
+  const isSold = property.status === "VENDU";
+  const isRented = property.status === "LOUE";
+  const isUnderOffer = property.status === "SOUS_OFFRE";
+
+  const isUnavailable = isSold || isRented;
+  const hasSpecialStatus =
+    isSold || isRented || isUnderOffer;
+
+  const status = statusConfig[property.status];
+
+  const contactTitle = isSold
+    ? "Ce bien a été vendu"
+    : isRented
+      ? "Ce bien est loué"
+      : isUnderOffer
+        ? "Ce bien est sous offre"
+        : "Contactez Florian";
+
+  const contactDescription = isSold
+    ? "Ce bien a déjà trouvé son acquéreur. Vous recherchez un bien similaire ? Florian vous accompagne dans votre projet immobilier."
+    : isRented
+      ? "Ce bien est actuellement loué. Contactez Florian pour découvrir d'autres biens disponibles."
+      : isUnderOffer
+        ? "Une offre a été reçue pour ce bien. Contactez Florian pour connaître la situation actuelle ou découvrir d'autres opportunités."
+        : "Vous souhaitez visiter ce bien ou obtenir plus d'informations ? Florian vous accompagne dans votre projet immobilier.";
+
   return (
     <main className="property-detail-page">
 
@@ -69,9 +114,36 @@ export default async function PropertyDetailPage({ params }) {
 
           <div className="property-detail-hero-grid">
             <div>
-              <span className="property-status-badge">
-                {formatTransaction(property.transaction)}
-              </span>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: "10px",
+                  marginBottom: "12px",
+                }}
+              >
+                <span className="property-status-badge">
+                  {formatTransaction(property.transaction)}
+                </span>
+
+                {hasSpecialStatus && (
+                  <span
+                    style={{
+                      display: "inline-block",
+                      padding: "7px 15px",
+                      backgroundColor: status.color,
+                      color: "#ffffff",
+                      fontSize: "12px",
+                      fontWeight: "700",
+                      letterSpacing: "1.5px",
+                      borderRadius: "5px",
+                    }}
+                  >
+                    {status.label}
+                  </span>
+                )}
+              </div>
 
               <h1>{property.title}</h1>
 
@@ -96,8 +168,39 @@ export default async function PropertyDetailPage({ params }) {
       <section className="property-detail-content">
         <div className="container">
 
-          <div className="property-main-image">
+          <div
+            className="property-main-image"
+            style={{
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
             <PropertyGallery images={property.images} />
+
+            {/* BANDEAU SUR LA GALERIE */}
+
+            {hasSpecialStatus && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "22px",
+                  right: "22px",
+                  zIndex: 10,
+                  padding: "12px 24px",
+                  backgroundColor: status.color,
+                  color: "#ffffff",
+                  fontWeight: "800",
+                  fontSize: "15px",
+                  letterSpacing: "2px",
+                  textAlign: "center",
+                  borderRadius: "5px",
+                  boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+                  pointerEvents: "none",
+                }}
+              >
+                {status.label}
+              </div>
+            )}
           </div>
 
           <div className="property-detail-layout">
@@ -138,7 +241,10 @@ export default async function PropertyDetailPage({ params }) {
               {/* DESCRIPTION */}
 
               <div className="property-description-block">
-                <span className="eyebrow">Description</span>
+                <span className="eyebrow">
+                  Description
+                </span>
+
                 <h2>À propos de ce bien</h2>
 
                 <p style={{ whiteSpace: "pre-line" }}>
@@ -153,6 +259,7 @@ export default async function PropertyDetailPage({ params }) {
                 <span className="eyebrow">
                   Les détails
                 </span>
+
                 <h2>Caractéristiques du bien</h2>
 
                 <div className="property-info-list">
@@ -231,7 +338,6 @@ export default async function PropertyDetailPage({ params }) {
                     label="GES"
                     value={property.ges || "Non précisé"}
                   />
-
                 </div>
               </div>
 
@@ -248,6 +354,7 @@ export default async function PropertyDetailPage({ params }) {
                   <span className="eyebrow">
                     Prestations
                   </span>
+
                   <h2>Équipements et extérieurs</h2>
 
                   <div className="property-info-list">
@@ -276,33 +383,47 @@ export default async function PropertyDetailPage({ params }) {
 
             <aside className="property-contact-card">
               <span className="eyebrow">
-                Intéressé par ce bien ?
+                {isUnavailable
+                  ? "Votre projet immobilier"
+                  : "Intéressé par ce bien ?"}
               </span>
 
-              <h2>Contactez Florian</h2>
+              <h2>{contactTitle}</h2>
 
-              <p>
-                Vous souhaitez visiter ce bien ou obtenir
-                plus d'informations ? Florian vous accompagne
-                dans votre projet immobilier.
-              </p>
+              <p>{contactDescription}</p>
 
               <div className="property-contact-actions">
                 <Link
                   href="/contact"
                   className="btn btn-gold"
                 >
-                  Contacter l'agence
+                  {isUnavailable
+                    ? "Trouver un autre bien"
+                    : "Contacter l'agence"}
                 </Link>
 
-                <Link
-                  href={`/rendez-vous?property=${encodeURIComponent(
-                    property.slug || property.id
-                  )}`}
-                  className="btn btn-outline"
-                >
-                  Prendre rendez-vous
-                </Link>
+                {/* RENDEZ-VOUS UNIQUEMENT
+                    SI LE BIEN EST ENCORE DISPONIBLE */}
+
+                {/* {!isUnavailable && (
+                  <Link
+                    href={`/rendez-vous?property=${encodeURIComponent(
+                      property.slug || property.id
+                    )}`}
+                    className="btn btn-outline"
+                  >
+                    Prendre rendez-vous
+                  </Link>
+                )} */}
+
+                {isUnavailable && (
+                  <Link
+                    href="/biens"
+                    className="btn btn-outline"
+                  >
+                    Voir nos autres biens
+                  </Link>
+                )}
               </div>
 
               <div className="property-contact-note">

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const orientations = [
@@ -13,6 +13,14 @@ const orientations = [
   { value: "NORD_OUEST", label: "Nord-Ouest" },
   { value: "SUD_EST", label: "Sud-Est" },
   { value: "SUD_OUEST", label: "Sud-Ouest" },
+];
+
+const statuts = [
+  { value: "DISPONIBLE", label: "Disponible" },
+  { value: "SOUS_OFFRE", label: "Sous offre" },
+  { value: "VENDU", label: "Vendu" },
+  { value: "LOUE", label: "Loué" },
+  { value: "ARCHIVE", label: "Archivé" },
 ];
 
 function normalizeOrientation(value) {
@@ -29,10 +37,12 @@ function normalizeOrientation(value) {
 export default function EditPropertyForm({ property }) {
   const router = useRouter();
 
+  // INFORMATIONS DU BIEN
   const [form, setForm] = useState({
     title: property.title ?? "",
     type: property.type ?? "MAISON",
     transaction: property.transaction ?? "VENTE",
+    status: property.status ?? "DISPONIBLE",
     price: property.price ?? "",
     city: property.city ?? "",
     postalCode: property.postalCode ?? "",
@@ -58,8 +68,36 @@ export default function EditPropertyForm({ property }) {
     hasElevator: Boolean(property.hasElevator),
   });
 
+  // PHOTOS EXISTANTES
+  const [existingImages, setExistingImages] = useState(
+    property.images ?? []
+  );
+
+  // NOUVELLES PHOTOS
+  const [newImages, setNewImages] = useState([]);
+
+  // PHOTOS À SUPPRIMER
+  const [imagesToDelete, setImagesToDelete] = useState([]);
+
+  // PHOTO PRINCIPALE
+  const initialPrimary =
+    property.images?.find((image) => image.isPrimary) ??
+    property.images?.[0];
+
+  const [primaryImageId, setPrimaryImageId] = useState(
+    initialPrimary ? `existing:${initialPrimary.id}` : null
+  );
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // NETTOYAGE DES PRÉVISUALISATIONS
+  useEffect(() => {
+    return () => {
+      // Chaque prévisualisation est libérée lors
+      // de son retrait ou au démontage du formulaire.
+    };
+  }, []);
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
@@ -70,6 +108,134 @@ export default function EditPropertyForm({ property }) {
     }));
   }
 
+  // AJOUTER DES PHOTOS
+  function handleAddImages(e) {
+    const files = Array.from(e.target.files ?? []);
+
+    if (!files.length) return;
+
+    const validFiles = files.filter(
+      (file) =>
+        ["image/jpeg", "image/png", "image/webp"].includes(
+          file.type
+        ) &&
+        file.size <= 10 * 1024 * 1024
+    );
+
+    if (validFiles.length !== files.length) {
+      setError(
+        "Certaines photos ont été ignorées. Formats autorisés : JPG, PNG, WebP. Maximum 10 Mo."
+      );
+    } else {
+      setError("");
+    }
+
+    const images = validFiles.map((file) => ({
+      id: crypto.randomUUID(),
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+
+    setNewImages((prev) => [...prev, ...images]);
+
+    if (
+      !primaryImageId &&
+      !existingImages.length &&
+      images.length
+    ) {
+      setPrimaryImageId(`new:${images[0].id}`);
+    }
+
+    e.target.value = "";
+  }
+
+  // SUPPRIMER UNE PHOTO EXISTANTE
+  function handleDeleteExisting(imageId) {
+    const remaining = existingImages.filter(
+      (image) => image.id !== imageId
+    );
+
+    setExistingImages(remaining);
+
+    setImagesToDelete((prev) =>
+      prev.includes(imageId) ? prev : [...prev, imageId]
+    );
+
+    if (primaryImageId === `existing:${imageId}`) {
+      if (remaining.length) {
+        setPrimaryImageId(`existing:${remaining[0].id}`);
+      } else if (newImages.length) {
+        setPrimaryImageId(`new:${newImages[0].id}`);
+      } else {
+        setPrimaryImageId(null);
+      }
+    }
+  }
+
+  // SUPPRIMER UNE NOUVELLE PHOTO
+  function handleDeleteNew(imageId) {
+    const image = newImages.find(
+      (item) => item.id === imageId
+    );
+
+    if (image) {
+      URL.revokeObjectURL(image.preview);
+    }
+
+    const remaining = newImages.filter(
+      (item) => item.id !== imageId
+    );
+
+    setNewImages(remaining);
+
+    if (primaryImageId === `new:${imageId}`) {
+      if (existingImages.length) {
+        setPrimaryImageId(
+          `existing:${existingImages[0].id}`
+        );
+      } else if (remaining.length) {
+        setPrimaryImageId(`new:${remaining[0].id}`);
+      } else {
+        setPrimaryImageId(null);
+      }
+    }
+  }
+
+  // ENVOYER UNE PHOTO SUR CLOUDINARY
+  async function uploadImage(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(
+      "/api/admin/biens/upload-photo",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+          data.error ||
+          "Impossible d'envoyer une photo."
+      );
+    }
+
+    const url = data.url || data.secure_url;
+
+    if (!url) {
+      throw new Error(
+        "L'envoi de la photo n'a pas retourné d'URL."
+      );
+    }
+
+    return { url };
+  }
+
+  // ENREGISTRER LES MODIFICATIONS
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -79,6 +245,56 @@ export default function EditPropertyForm({ property }) {
     setError("");
 
     try {
+      // 1. Envoyer les nouvelles photos
+      const uploadedImages = [];
+
+      for (const image of newImages) {
+        const uploaded = await uploadImage(image.file);
+
+        uploadedImages.push({
+          id: image.id,
+          url: uploaded.url,
+        });
+      }
+
+      // 2. Trouver la photo principale
+      let selectedExistingId = null;
+      let selectedNewIndex = null;
+
+      if (primaryImageId?.startsWith("existing:")) {
+        selectedExistingId = primaryImageId.replace(
+          "existing:",
+          ""
+        );
+      }
+
+      if (primaryImageId?.startsWith("new:")) {
+        const selectedId = primaryImageId.replace(
+          "new:",
+          ""
+        );
+
+        const index = uploadedImages.findIndex(
+          (image) => image.id === selectedId
+        );
+
+        if (index >= 0) {
+          selectedNewIndex = index;
+        }
+      }
+
+      // 3. Préparer les données
+      const payload = {
+        ...form,
+        imagesToDelete,
+        newImages: uploadedImages.map((image) => ({
+          url: image.url,
+        })),
+        primaryImageId: selectedExistingId,
+        primaryNewImageIndex: selectedNewIndex,
+      };
+
+      // 4. Modifier le bien
       const res = await fetch(
         `/api/admin/biens/${property.id}`,
         {
@@ -86,7 +302,7 @@ export default function EditPropertyForm({ property }) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(form),
+          body: JSON.stringify(payload),
         }
       );
 
@@ -95,15 +311,18 @@ export default function EditPropertyForm({ property }) {
       if (!res.ok) {
         throw new Error(
           data.message ||
-          data.error ||
-          "Erreur lors de la modification."
+            data.error ||
+            "Erreur lors de la modification."
         );
       }
 
+      // 5. Retour à la liste
       router.push("/admin/biens");
       router.refresh();
     } catch (err) {
-      setError(err.message || "Une erreur est survenue.");
+      setError(
+        err.message || "Une erreur est survenue."
+      );
     } finally {
       setLoading(false);
     }
@@ -162,7 +381,9 @@ export default function EditPropertyForm({ property }) {
           />
 
           <div className="admin-field">
-            <label htmlFor="type">Type de bien</label>
+            <label htmlFor="type">
+              Type de bien
+            </label>
 
             <select
               id="type"
@@ -171,10 +392,14 @@ export default function EditPropertyForm({ property }) {
               onChange={handleChange}
             >
               <option value="MAISON">Maison</option>
-              <option value="APPARTEMENT">Appartement</option>
+              <option value="APPARTEMENT">
+                Appartement
+              </option>
               <option value="IMMEUBLE">Immeuble</option>
               <option value="TERRAIN">Terrain</option>
-              <option value="LOCAL">Local commercial</option>
+              <option value="LOCAL">
+                Local commercial
+              </option>
               <option value="BUREAU">Bureau</option>
               <option value="AUTRE">Autre</option>
             </select>
@@ -196,6 +421,61 @@ export default function EditPropertyForm({ property }) {
             </select>
           </div>
         </div>
+      </div>
+
+      {/* STATUT DU BIEN */}
+
+      <div className="premium-section">
+        <div className="premium-section-head">
+          <div>
+            <p className="premium-kicker">
+              Commercialisation
+            </p>
+            <h2>Statut du bien</h2>
+          </div>
+        </div>
+
+        <div className="admin-form-grid">
+          <div className="admin-field">
+            <label htmlFor="status">
+              Situation actuelle
+            </label>
+
+            <select
+              id="status"
+              name="status"
+              value={form.status}
+              onChange={handleChange}
+            >
+              {statuts.map((statut) => (
+                <option
+                  key={statut.value}
+                  value={statut.value}
+                >
+                  {statut.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {form.status === "VENDU" && (
+          <p
+            style={{
+              marginTop: "15px",
+              color: "#9b3232",
+              fontWeight: 600,
+            }}
+          >
+            Ce bien sera marqué comme VENDU.
+          </p>
+        )}
+
+        {form.status === "SOUS_OFFRE" && (
+          <p style={{ marginTop: "15px" }}>
+            Une offre a été reçue pour ce bien.
+          </p>
+        )}
       </div>
 
       {/* SURFACES ET ORIENTATION */}
@@ -349,44 +629,225 @@ export default function EditPropertyForm({ property }) {
         </div>
       </div>
 
-      {/* PHOTOS ACTUELLES */}
+      {/* GESTION DES PHOTOS */}
 
       <div className="premium-section">
         <div className="premium-section-head">
           <div>
             <p className="premium-kicker">
-              Photos actuelles
+              Galerie immobilière
             </p>
-            <h2>Images du bien</h2>
+            <h2>Photos du bien</h2>
           </div>
         </div>
 
-        {property.images?.length > 0 ? (
-          <div className="premium-preview-grid">
-            {property.images.map((image, index) => (
-              <div
-                className="premium-preview-card"
-                key={image.id}
-              >
-                <div className="premium-preview-image-wrap">
-                  <img
-                    src={image.url}
-                    alt={`Photo ${index + 1}`}
-                    className="premium-preview-image"
-                  />
+        <p style={{ marginBottom: "20px" }}>
+          Ajoutez ou supprimez des photos et
+          sélectionnez celle qui apparaîtra
+          en premier sur l'annonce.
+        </p>
 
-                  {image.isPrimary && (
-                    <div className="premium-primary-badge">
-                      Image principale
+        {/* PHOTOS EXISTANTES */}
+
+        {existingImages.length > 0 && (
+          <>
+            <h3 style={{ marginBottom: "15px" }}>
+              Photos enregistrées
+            </h3>
+
+            <div className="premium-preview-grid">
+              {existingImages.map((image, index) => {
+                const selected =
+                  primaryImageId ===
+                  `existing:${image.id}`;
+
+                return (
+                  <div
+                    className="premium-preview-card"
+                    key={image.id}
+                  >
+                    <div className="premium-preview-image-wrap">
+                      <img
+                        src={image.url}
+                        alt={`Photo ${index + 1}`}
+                        className="premium-preview-image"
+                      />
+
+                      {selected && (
+                        <div className="premium-primary-badge">
+                          Image principale
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p>Aucune photo enregistrée.</p>
+
+                    <div
+                      style={{
+                        padding: "10px",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "8px",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        className="btn btn-outline"
+                        disabled={loading}
+                        onClick={() =>
+                          setPrimaryImageId(
+                            `existing:${image.id}`
+                          )
+                        }
+                      >
+                        {selected
+                          ? "★ Photo principale"
+                          : "Définir comme principale"}
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={loading}
+                        onClick={() =>
+                          handleDeleteExisting(image.id)
+                        }
+                        style={{
+                          color: "#a32b2b",
+                          background: "#fff0f0",
+                          border: "1px solid #e6b5b5",
+                          padding: "10px",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Supprimer cette photo
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
+
+        {/* NOUVELLES PHOTOS */}
+
+        {newImages.length > 0 && (
+          <>
+            <h3
+              style={{
+                marginTop: "25px",
+                marginBottom: "15px",
+              }}
+            >
+              Nouvelles photos
+            </h3>
+
+            <div className="premium-preview-grid">
+              {newImages.map((image, index) => {
+                const selected =
+                  primaryImageId ===
+                  `new:${image.id}`;
+
+                return (
+                  <div
+                    className="premium-preview-card"
+                    key={image.id}
+                  >
+                    <div className="premium-preview-image-wrap">
+                      <img
+                        src={image.preview}
+                        alt={`Nouvelle photo ${index + 1}`}
+                        className="premium-preview-image"
+                      />
+
+                      {selected && (
+                        <div className="premium-primary-badge">
+                          Image principale
+                        </div>
+                      )}
+                    </div>
+
+                    <div
+                      style={{
+                        padding: "10px",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "8px",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        className="btn btn-outline"
+                        disabled={loading}
+                        onClick={() =>
+                          setPrimaryImageId(
+                            `new:${image.id}`
+                          )
+                        }
+                      >
+                        {selected
+                          ? "★ Photo principale"
+                          : "Définir comme principale"}
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={loading}
+                        onClick={() =>
+                          handleDeleteNew(image.id)
+                        }
+                        style={{
+                          color: "#a32b2b",
+                          background: "#fff0f0",
+                          border: "1px solid #e6b5b5",
+                          padding: "10px",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Retirer cette photo
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        {/* AJOUT DE PHOTOS */}
+
+        <div
+          className="admin-field admin-field-full"
+          style={{ marginTop: "25px" }}
+        >
+          <label htmlFor="newPropertyImages">
+            Ajouter des photos
+          </label>
+
+          <input
+            id="newPropertyImages"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            disabled={loading}
+            onChange={handleAddImages}
+          />
+
+          <small
+            style={{
+              display: "block",
+              marginTop: "8px",
+            }}
+          >
+            Formats JPG, PNG ou WebP.
+            Maximum 10 Mo par image.
+          </small>
+        </div>
+
+        {existingImages.length === 0 &&
+          newImages.length === 0 && (
+            <p>Aucune photo sélectionnée.</p>
+          )}
       </div>
 
       {/* OPTIONS DU BIEN */}
@@ -461,7 +922,7 @@ export default function EditPropertyForm({ property }) {
           disabled={loading}
         >
           {loading
-            ? "Modification..."
+            ? "Enregistrement en cours..."
             : "Enregistrer les modifications"}
         </button>
       </div>
@@ -503,7 +964,12 @@ function Field({
 
 // CASE À COCHER RÉUTILISABLE
 
-function Checkbox({ label, name, checked, onChange }) {
+function Checkbox({
+  label,
+  name,
+  checked,
+  onChange,
+}) {
   return (
     <div className="admin-option">
       <input
